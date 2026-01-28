@@ -1,0 +1,38 @@
+# Skynet - Personal Assistant Dependencies
+
+# Speech Recognition (STT) - Whisper with AMD GPU acceleration
+openai-whisper>=20231117
+optimum[onnxruntime-directml]>=1.16.0
+onnxruntime-directml>=1.16.0
+transformers>=4.36.0
+sounddevice>=0.4.6
+numpy>=1.24.0
+scipy>=1.11.0
+
+# AI Integration (New SDK - replacing deprecated google-generativeai)
+google-genai
+
+# Text-to-Speech (TTS)
+pyttsx3>=2.90
+edge-tts>=6.1.0
+pygame>=2.4.0
+
+# System Control
+pyautogui>=0.9.53
+pygetwindow>=0.0.9
+psutil>=5.9.0
+keyboard>=0.13.5
+
+# Web Server for Frontend Communication
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+websockets>=12.0
+python-multipart>=0.0.6
+
+# Memory & Database (aiofiles only - sqlite3 is built-in)
+aiofiles>=23.2.0
+
+# Utilities
+python-dotenv>=1.0.0
+aiohttp>=3.9.0
+httpx>=0.25.0
