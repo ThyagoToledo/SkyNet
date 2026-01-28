@@ -1,60 +1,60 @@
-# 🤖 SKYNET - Assistente Pessoal com IA
+# SKYNET - Assistente Pessoal com IA
 
 <div align="center">
 
-![Skynet Banner](https://img.shields.io/badge/SKYNET-AI%20Assistant-00d4ff?style=for-the-badge&logo=robot&logoColor=white)
+![Skynet Logo](assets/skynet-logo.png)
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![Three.js](https://img.shields.io/badge/Three.js-r128-black?style=flat-square&logo=three.js&logoColor=white)](https://threejs.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
-**Um assistente pessoal inteligente para PC com visualização 3D interativa de partículas**
+Um assistente pessoal inteligente para PC com visualização 3D interativa de partículas
 
 [Instalação](#-instalação) •
-[Funcionalidades](#-funcionalidades) •
-[Uso](#-como-usar) •
-[Comandos](#-comandos-de-voz) •
-[Tecnologias](#-tecnologias)
+[Funcionalidades](#funcionalidades) •
+[Uso](#como-usar) •
+[Comandos](#comandos-de-voz) •
+[Tecnologias](#tecnologias)
 
 </div>
 
 ---
 
-## 🎯 Sobre o Projeto
+## Sobre o Projeto
 
 Skynet é um assistente pessoal para PC que combina:
-- **Reconhecimento de voz** com Whisper (processamento local, privado)
-- **Inteligência Artificial** com Google Gemini
-- **Síntese de voz** natural com Edge TTS
-- **Controle do sistema** (abrir apps, executar comandos, pesquisar na web)
-- **Visualização 3D** interativa com sistema de partículas
+- Reconhecimento de voz com Whisper (processamento local, privado)
+- Inteligência Artificial com Google Gemini
+- Síntese de voz natural com Edge TTS
+- Controle do sistema (abrir apps, executar comandos, pesquisar na web)
+- Visualização 3D interativa com sistema de partículas
 
 ![Demo](https://img.shields.io/badge/Status-Em%20Desenvolvimento-yellow?style=flat-square)
 
 ---
 
-## ✨ Funcionalidades
+## Funcionalidades
 
-### 🎤 Reconhecimento de Voz (Speech-to-Text)
-- Modelo **OpenAI Whisper** rodando localmente
-- Aceleração **AMD GPU** via DirectML
-- **100% offline** após download do modelo
+### Reconhecimento de Voz (Speech-to-Text)
+- Modelo OpenAI Whisper rodando localmente
+- Aceleração AMD GPU via DirectML
+- 100% offline após download do modelo
 - Suporte a português brasileiro
 - Ignora ruídos de fundo
 
-### 🧠 Inteligência Artificial
-- Integração com **Google Gemini API**
+### Inteligência Artificial
+- Integração com Google Gemini API
 - Memória de conversação
 - Análise de intenção do usuário
 - Respostas contextuais e naturais
 
-### 🔊 Síntese de Voz (Text-to-Speech)
-- **Edge TTS** - Vozes neurais da Microsoft (qualidade premium)
-- Fallback para **pyttsx3** (offline)
+### Síntese de Voz (Text-to-Speech)
+- Edge TTS - Vozes neurais da Microsoft (qualidade premium)
+- Fallback para pyttsx3 (offline)
 - Voz em português brasileiro
 
-### 💻 Controle do Sistema
+### Controle do Sistema
 | Comando | Ação |
 |---------|------|
 | Abrir aplicativos | Chrome, VS Code, Spotify, etc. |
@@ -65,29 +65,29 @@ Skynet é um assistente pessoal para PC que combina:
 | Screenshot | Captura de tela |
 | Digitar texto | Automação de teclado |
 
-### 🧠 Sistema de Memória
-- **Curto prazo**: Histórico da conversa atual
-- **Longo prazo**: Banco SQLite com preferências
+### Sistema de Memória
+- Curto prazo: Histórico da conversa atual
+- Longo prazo: Banco SQLite com preferências
 - Extração automática de informações do usuário
 
-### 🎨 Visualização 3D
+### Visualização 3D
 Sistema de partículas interativo com múltiplos modos:
-- ⭕ **Esfera** - Partículas em formação esférica
-- ⚛️ **Átomo** - Órbitas atômicas
-- 🎆 **Fogos** - Explosão de partículas
-- 🌊 **Onda** - Ondulação suave
-- 🧬 **Hélice** - Estrutura de DNA
-- 🌌 **Galáxia** - Braços espirais
+- Esfera - Partículas em formação esférica
+- Átomo - Órbitas atômicas
+- Fogos - Explosão de partículas
+- Onda - Ondulação suave
+- Hélice - Estrutura de DNA
+- Galáxia - Braços espirais
 
 As partículas respondem ao estado do assistente:
-- 🔵 **Idle** - Azul calmo
-- 🟢 **Ouvindo** - Verde pulsante
-- 🟠 **Pensando** - Laranja rápido
-- 🟣 **Falando** - Roxo expansivo
+- Idle - Azul calmo
+- Ouvindo - Verde pulsante
+- Pensando - Laranja rápido
+- Falando - Roxo expansivo
 
 ---
 
-## 🚀 Instalação
+## Instalação
 
 ### Pré-requisitos
 - Python 3.10 ou superior
@@ -132,11 +132,11 @@ copy .env.example .env
 GEMINI_API_KEY=sua_api_key_aqui
 ```
 
-> 📝 Obtenha sua API Key gratuita em: https://makersuite.google.com/app/apikey
+> Obtenha sua API Key gratuita em: https://makersuite.google.com/app/apikey
 
 ---
 
-## 🎮 Como Usar
+## Como Usar
 
 ### Iniciar o Assistente
 
@@ -154,13 +154,13 @@ Abra no navegador: **http://localhost:8000**
 
 ### Interação
 
-1. **Por voz**: Clique no 🎤 ou diga "Skynet"
-2. **Por texto**: Digite na caixa de mensagem
-3. **Modos visuais**: Clique nos botões à direita
+1. Por voz: Clique no botão de voz ou diga "Skynet"
+2. Por texto: Digite na caixa de mensagem
+3. Modos visuais: Clique nos botões à direita
 
 ---
 
-## 🗣️ Comandos de Voz
+## Comandos de Voz
 
 ### Aplicativos
 ```
@@ -193,43 +193,43 @@ Abra no navegador: **http://localhost:8000**
 
 ---
 
-## 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 skynet/
-├── 📄 main.py                    # Entrada principal
-├── 📄 requirements.txt           # Dependências
-├── 📄 .env                       # Configurações (criar)
+├── main.py                    # Entrada principal
+├── requirements.txt           # Dependências
+├── .env                       # Configurações (criar)
 │
-├── 📁 src/
-│   ├── 📁 core/
+├── src/
+│   ├── core/
 │   │   └── assistant.py          # Orquestrador
-│   ├── 📁 speech/
+│   ├── speech/
 │   │   ├── speech_to_text.py     # Whisper STT
 │   │   └── text_to_speech.py     # Edge TTS
-│   ├── 📁 ai/
+│   ├── ai/
 │   │   └── gemini_client.py      # Cliente Gemini
-│   ├── 📁 system/
+│   ├── system/
 │   │   └── system_controller.py  # Controle PC
-│   ├── 📁 memory/
+│   ├── memory/
 │   │   └── memory_manager.py     # SQLite
-│   └── 📁 server/
+│   └── server/
 │       └── websocket_server.py   # FastAPI
 │
-├── 📁 frontend/
+├── frontend/
 │   ├── index.html                # Interface
-│   └── 📁 js/
+│   └── js/
 │       ├── particles.js          # Three.js 3D
 │       ├── websocket-client.js   # WebSocket
 │       └── app.js                # App frontend
 │
-└── 📁 data/
+└── data/
     └── memory.db                 # Banco de dados
 ```
 
 ---
 
-## 🛠️ Tecnologias
+## Tecnologias
 
 ### Backend
 | Tecnologia | Uso |
@@ -249,7 +249,7 @@ skynet/
 
 ---
 
-## ⚙️ Configurações
+## Configurações
 
 ### Variáveis de Ambiente (.env)
 
@@ -277,37 +277,37 @@ MEMORY_DB_PATH=./data/memory.db
 
 ---
 
-## 🤝 Contribuindo
+## Contribuindo
 
 Contribuições são bem-vindas! 
 
 1. Fork o projeto
-2. Crie sua branch (`git checkout -b feature/NovaFeature`)
-3. Commit suas mudanças (`git commit -m 'Add NovaFeature'`)
-4. Push para a branch (`git push origin feature/NovaFeature`)
+2. Crie sua branch (git checkout -b feature/NovaFeature)
+3. Commit suas mudanças (git commit -m 'Add NovaFeature')
+4. Push para a branch (git push origin feature/NovaFeature)
 5. Abra um Pull Request
 
 ---
 
-## 📝 Licença
+## Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
 ---
 
-## 🙏 Agradecimentos
+## Agradecimentos
 
-- [OpenAI Whisper](https://github.com/openai/whisper) - Reconhecimento de voz
-- [Google Gemini](https://ai.google.dev/) - IA generativa
-- [Three.js](https://threejs.org/) - Gráficos 3D
-- [FastAPI](https://fastapi.tiangolo.com/) - Framework web
+- OpenAI Whisper - Reconhecimento de voz
+- Google Gemini - IA generativa
+- Three.js - Gráficos 3D
+- FastAPI - Framework web
 
 ---
 
 <div align="center">
 
-**Feito com ❤️ e ☕**
+Feito com dedicação e café
 
-⭐ Se este projeto te ajudou, deixe uma estrela!
+Deixe uma estrela se este projeto ajudou!
 
 </div>
