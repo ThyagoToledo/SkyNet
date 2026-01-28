@@ -6,16 +6,16 @@ echo.
 
 cd /d "%~dp0"
 
-if not exist ".venv\Scripts\activate.bat" (
-    if not exist "venv\Scripts\activate.bat" (
-        echo [ERRO] Ambiente virtual nao encontrado!
-        echo Execute o install.bat primeiro.
-        pause
-        exit /b 1
-    )
+REM Check for venv first, then .venv
+if exist "venv\Scripts\activate.bat" (
     call venv\Scripts\activate.bat
-) else (
+) else if exist ".venv\Scripts\activate.bat" (
     call .venv\Scripts\activate.bat
+) else (
+    echo [ERRO] Ambiente virtual nao encontrado!
+    echo Execute o install.bat primeiro.
+    pause
+    exit /b 1
 )
 
 echo [Skynet] Iniciando aplicacao desktop...

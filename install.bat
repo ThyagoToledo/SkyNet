@@ -45,11 +45,10 @@ echo    Installation Complete!
 echo ============================================
 echo.
 echo Next steps:
-echo 1. Copy .env.example to .env
-echo 2. Add your Gemini API key to .env
-echo 3. Run: python main.py
+echo 1. Install Ollama from: https://ollama.com/download
+echo 2. Run: ollama pull llama3.2
+echo 3. Run: start_desktop.bat (or start.bat for web mode)
 echo.
-echo Get your Gemini API key at:
-echo https://makersuite.google.com/app/apikey
+echo The AI runs 100%% locally - no API keys needed!
 echo.
 pause

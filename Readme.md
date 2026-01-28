@@ -1,15 +1,16 @@
-# SKYNET - Assistente Pessoal com IA
+# SKYNET - Assistente Pessoal com IA Local
 
 <div align="center">
 
 ![Skynet Logo](assets/SkyNet.png)
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![Ollama](https://img.shields.io/badge/Ollama-Local%20AI-black?style=flat-square)](https://ollama.com)
 [![Three.js](https://img.shields.io/badge/Three.js-r128-black?style=flat-square&logo=three.js&logoColor=white)](https://threejs.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
-Um assistente pessoal inteligente para PC com visualização 3D interativa de partículas
+Um assistente pessoal inteligente para PC com IA 100% local e visualização 3D interativa
 
 [Instalação](#-instalação) •
 [Funcionalidades](#funcionalidades) •
@@ -24,11 +25,12 @@ Um assistente pessoal inteligente para PC com visualização 3D interativa de pa
 ## Sobre o Projeto
 
 Skynet é um assistente pessoal para PC que combina:
-- Reconhecimento de voz com Whisper (processamento local, privado)
-- Inteligência Artificial com Google Gemini
+- **IA 100% Local com Ollama** - Gratuito, privado, sem API keys
+- Reconhecimento de voz com Whisper (processamento local)
 - Síntese de voz natural com Edge TTS
 - Controle do sistema (abrir apps, executar comandos, pesquisar na web)
 - Visualização 3D interativa com sistema de partículas
+- **Suporte a CPU, NVIDIA (CUDA) e AMD (DirectML)**
 
 ![Demo](https://img.shields.io/badge/Status-Em%20Desenvolvimento-yellow?style=flat-square)
 
@@ -36,25 +38,26 @@ Skynet é um assistente pessoal para PC que combina:
 
 ## Funcionalidades
 
-### Reconhecimento de Voz (Speech-to-Text)
+### 🤖 Inteligência Artificial Local (Ollama)
+- **100% Gratuito** - Sem custos de API
+- **100% Privado** - Dados nunca saem do seu PC
+- **Offline** - Funciona sem internet após instalação
+- Modelos de alta qualidade (Llama 3.2, Mistral, etc.)
+- Suporte a GPU: NVIDIA (CUDA) e AMD (DirectML)
+
+### 🎤 Reconhecimento de Voz (Speech-to-Text)
 - Modelo OpenAI Whisper rodando localmente
-- Aceleração AMD GPU via DirectML
+- Aceleração GPU (NVIDIA/AMD)
 - 100% offline após download do modelo
 - Suporte a português brasileiro
 - Ignora ruídos de fundo
 
-### Inteligência Artificial
-- Integração com Google Gemini API
-- Memória de conversação
-- Análise de intenção do usuário
-- Respostas contextuais e naturais
-
-### Síntese de Voz (Text-to-Speech)
+### 🔊 Síntese de Voz (Text-to-Speech)
 - Edge TTS - Vozes neurais da Microsoft (qualidade premium)
 - Fallback para pyttsx3 (offline)
 - Voz em português brasileiro
 
-### Controle do Sistema
+### 💻 Controle do Sistema
 | Comando | Ação |
 |---------|------|
 | Abrir aplicativos | Chrome, VS Code, Spotify, etc. |
@@ -65,25 +68,21 @@ Skynet é um assistente pessoal para PC que combina:
 | Screenshot | Captura de tela |
 | Digitar texto | Automação de teclado |
 
-### Sistema de Memória
+### 🧠 Sistema de Memória
 - Curto prazo: Histórico da conversa atual
 - Longo prazo: Banco SQLite com preferências
 - Extração automática de informações do usuário
 
-### Visualização 3D
+### ✨ Visualização 3D
 Sistema de partículas interativo com múltiplos modos:
-- Esfera - Partículas em formação esférica
-- Átomo - Órbitas atômicas
-- Fogos - Explosão de partículas
-- Onda - Ondulação suave
-- Hélice - Estrutura de DNA
-- Galáxia - Braços espirais
+- **Esfera** - Partículas em formação esférica densa
+- **Átomo** - Órbitas atômicas
+- **Fogos** - Explosão de partículas
+- **Onda** - Ondulação suave
+- **Hélice** - Estrutura de DNA
+- **Galáxia** - Braços espirais
 
-As partículas respondem ao estado do assistente:
-- Idle - Azul calmo
-- Ouvindo - Verde pulsante
-- Pensando - Laranja rápido
-- Falando - Roxo expansivo
+**Animação de Introdução:** Ao iniciar, a esfera se transforma no texto "SKYNET" e depois volta à forma esférica!
 
 ---
 
@@ -92,17 +91,23 @@ As partículas respondem ao estado do assistente:
 ### Pré-requisitos
 - Python 3.10 ou superior
 - Windows 10/11
-- (Opcional) GPU AMD para aceleração
+- **Ollama** (IA Local) - https://ollama.com/download
 
 ### Instalação Rápida (Windows)
 
 ```bash
 # 1. Clone o repositório
-git clone https://github.com/seu-usuario/skynet.git
-cd skynet
+git clone https://github.com/ThyagoToledo/SkyNet.git
+cd SkyNet
 
 # 2. Execute o instalador
 install.bat
+
+# 3. Instale o Ollama
+# Baixe de: https://ollama.com/download
+
+# 4. Baixe o modelo de IA
+ollama pull llama3.2
 ```
 
 ### Instalação Manual
@@ -118,6 +123,10 @@ pip install -r requirements.txt
 # 3. Instalar PyAudio (Windows)
 pip install pipwin
 pipwin install pyaudio
+
+# 4. Instalar Ollama (separadamente)
+# Baixe de: https://ollama.com/download
+# Depois execute: ollama pull llama3.2
 ```
 
 ### Configuração
@@ -127,12 +136,13 @@ pipwin install pyaudio
 copy .env.example .env
 ```
 
-2. Edite `.env` e adicione sua API Key do Gemini:
+2. (Opcional) Edite `.env` para personalizar:
 ```env
-GEMINI_API_KEY=sua_api_key_aqui
+OLLAMA_MODEL=llama3.2
+ASSISTANT_NAME=Skynet
 ```
 
-> Obtenha sua API Key gratuita em: https://makersuite.google.com/app/apikey
+> **Não é necessária nenhuma API Key!** A IA roda 100% local.
 
 ---
 
@@ -140,23 +150,36 @@ GEMINI_API_KEY=sua_api_key_aqui
 
 ### Iniciar o Assistente
 
+**Modo Desktop (Recomendado):**
 ```bash
-# Windows
-start.bat
-
-# Ou diretamente
-python main.py
+start_desktop.bat
 ```
 
-### Acessar a Interface
+**Modo Web (Navegador):**
+```bash
+start.bat
+# Depois abra: http://localhost:8000
+```
 
-Abra no navegador: **http://localhost:8000**
+### Seleção de Hardware
+
+Ao iniciar, você será perguntado sobre qual hardware usar:
+```
+╔══════════════════════════════════════════════════════════════╗
+║           SKYNET - Seleção de Hardware para IA               ║
+╠══════════════════════════════════════════════════════════════╣
+║  [1] CPU (funciona em qualquer PC)                           ║
+║  [2] NVIDIA GPU - GeForce RTX 3080                           ║
+║  [3] AMD GPU - Radeon RX 6800                                ║
+╚══════════════════════════════════════════════════════════════╝
+```
 
 ### Interação
 
-1. Por voz: Clique no botão de voz ou diga "Skynet"
-2. Por texto: Digite na caixa de mensagem
-3. Modos visuais: Clique nos botões à direita
+1. **Por voz:** Clique no botão de voz 🎤 ou diga "Skynet"
+2. **Por texto:** Digite na caixa de mensagem
+3. **Modos visuais:** Clique nos botões à direita
+4. **Configurações:** Clique no ⚙️ para ajustar áudio
 
 ---
 
@@ -197,18 +220,20 @@ Abra no navegador: **http://localhost:8000**
 
 ```
 skynet/
-├── 📄 main.py                    # Entrada principal
+├── 📄 main.py                    # Entrada principal (web)
+├── 📄 desktop_app.py             # Aplicação desktop
 ├── 📄 requirements.txt           # Dependências
 ├── 📄 .env                       # Configurações (criar)
 │
 ├── 📁 src/
 │   ├── 📁 core/
-│   │   └── assistant.py          # Orquestrador
+│   │   ├── assistant.py          # Orquestrador
+│   │   └── hardware_selector.py  # Seleção CPU/GPU
 │   ├── 📁 speech/
 │   │   ├── speech_to_text.py     # Whisper STT
 │   │   └── text_to_speech.py     # Edge TTS
 │   ├── 📁 ai/
-│   │   └── gemini_client.py      # Cliente Gemini
+│   │   └── ollama_client.py      # Cliente Ollama (IA Local)
 │   ├── 📁 system/
 │   │   └── system_controller.py  # Controle PC
 │   ├── 📁 memory/
@@ -235,9 +260,9 @@ skynet/
 | Tecnologia | Uso |
 |------------|-----|
 | ![Python](https://img.shields.io/badge/-Python-3776AB?style=flat-square&logo=python&logoColor=white) | Linguagem principal |
+| ![Ollama](https://img.shields.io/badge/-Ollama-000000?style=flat-square) | IA local |
 | ![FastAPI](https://img.shields.io/badge/-FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white) | Servidor web |
 | ![Whisper](https://img.shields.io/badge/-Whisper-412991?style=flat-square&logo=openai&logoColor=white) | Reconhecimento de voz |
-| ![Gemini](https://img.shields.io/badge/-Gemini-4285F4?style=flat-square&logo=google&logoColor=white) | IA generativa |
 | ![SQLite](https://img.shields.io/badge/-SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white) | Banco de dados |
 
 ### Frontend
@@ -254,8 +279,9 @@ skynet/
 ### Variáveis de Ambiente (.env)
 
 ```env
-# API Key do Gemini (obrigatório para IA completa)
-GEMINI_API_KEY=your_api_key_here
+# Configurações do Ollama (IA Local)
+OLLAMA_MODEL=llama3.2
+OLLAMA_HOST=http://localhost:11434
 
 # Configurações do assistente
 ASSISTANT_NAME=Skynet
@@ -297,10 +323,10 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ## Agradecimentos
 
-- [OpenAI Whisper](https://github.com/openai/whisper)  Reconhecimento de voz
-- [Google Gemini](https://ai.google.dev/)  IA generativa
-- [Three.js](https://threejs.org/)  Gráficos 3D
-- [FastAPI](https://fastapi.tiangolo.com/)  Framework web
+- [Ollama](https://ollama.com/) - IA local gratuita
+- [OpenAI Whisper](https://github.com/openai/whisper) - Reconhecimento de voz
+- [Three.js](https://threejs.org/) - Gráficos 3D
+- [FastAPI](https://fastapi.tiangolo.com/) - Framework web
 
 ---
 
