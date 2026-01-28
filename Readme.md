@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Skynet Logo](assets/skynet-logo.png)
+![Skynet Logo](assets/SkyNet.png)
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![Three.js](https://img.shields.io/badge/Three.js-r128-black?style=flat-square&logo=three.js&logoColor=white)](https://threejs.org)
