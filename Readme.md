@@ -197,33 +197,33 @@ Abra no navegador: **http://localhost:8000**
 
 ```
 skynet/
-├── main.py                    # Entrada principal
-├── requirements.txt           # Dependências
-├── .env                       # Configurações (criar)
+├── 📄 main.py                    # Entrada principal
+├── 📄 requirements.txt           # Dependências
+├── 📄 .env                       # Configurações (criar)
 │
-├── src/
-│   ├── core/
+├── 📁 src/
+│   ├── 📁 core/
 │   │   └── assistant.py          # Orquestrador
-│   ├── speech/
+│   ├── 📁 speech/
 │   │   ├── speech_to_text.py     # Whisper STT
 │   │   └── text_to_speech.py     # Edge TTS
-│   ├── ai/
+│   ├── 📁 ai/
 │   │   └── gemini_client.py      # Cliente Gemini
-│   ├── system/
+│   ├── 📁 system/
 │   │   └── system_controller.py  # Controle PC
-│   ├── memory/
+│   ├── 📁 memory/
 │   │   └── memory_manager.py     # SQLite
-│   └── server/
+│   └── 📁 server/
 │       └── websocket_server.py   # FastAPI
 │
-├── frontend/
+├── 📁 frontend/
 │   ├── index.html                # Interface
-│   └── js/
+│   └── 📁 js/
 │       ├── particles.js          # Three.js 3D
 │       ├── websocket-client.js   # WebSocket
 │       └── app.js                # App frontend
 │
-└── data/
+└── 📁 data/
     └── memory.db                 # Banco de dados
 ```
 
@@ -297,17 +297,17 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ## Agradecimentos
 
-- OpenAI Whisper - Reconhecimento de voz
-- Google Gemini - IA generativa
-- Three.js - Gráficos 3D
-- FastAPI - Framework web
+- [OpenAI Whisper](https://github.com/openai/whisper) 🎤 Reconhecimento de voz
+- [Google Gemini](https://ai.google.dev/) 🧠 IA generativa
+- [Three.js](https://threejs.org/) 🎨 Gráficos 3D
+- [FastAPI](https://fastapi.tiangolo.com/) ⚡ Framework web
 
 ---
 
 <div align="center">
 
-Feito com dedicação e café
+Feito com ❤️ e ☕
 
-Deixe uma estrela se este projeto ajudou!
+⭐ Deixe uma estrela se este projeto ajudou!
 
 </div>
