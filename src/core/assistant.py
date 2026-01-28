@@ -38,7 +38,7 @@ class SkynetAssistant:
         # Import modules
         from src.speech.speech_to_text import SpeechToText
         from src.speech.text_to_speech import TextToSpeech
-        from src.ai.gemini_client import GeminiClient
+        from src.ai.ollama_client import OllamaClient
         from src.system.system_controller import SystemController
         from src.memory.memory_manager import MemoryManager
         
@@ -56,8 +56,8 @@ class SkynetAssistant:
         self.tts = TextToSpeech()
         await self.tts.initialize()
         
-        print(f"[{self.name}] Initializing AI (Gemini)...")
-        self.ai = GeminiClient()
+        print(f"[{self.name}] Initializing AI (Ollama - Local)...")
+        self.ai = OllamaClient()
         await self.ai.initialize()
         
         print(f"[{self.name}] Initializing System Controller...")

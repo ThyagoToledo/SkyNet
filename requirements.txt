@@ -9,8 +9,8 @@ sounddevice>=0.4.6
 numpy>=1.24.0
 scipy>=1.11.0
 
-# AI Integration (New SDK - replacing deprecated google-generativeai)
-google-genai
+# AI Integration - Local Ollama (install separately from https://ollama.com)
+# No Python package needed - Ollama runs as a separate service
 
 # Text-to-Speech (TTS)
 pyttsx3>=2.90

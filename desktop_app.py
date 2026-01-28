@@ -157,14 +157,54 @@ def print_banner():
     ║   ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═══╝╚══════╝   ╚═╝           ║
     ║                                                               ║
     ║              Personal AI Assistant v1.0                       ║
-    ║                     Desktop Edition                           ║
+    ║                  Desktop Edition - Local AI                   ║
     ║                                                               ║
     ╚═══════════════════════════════════════════════════════════════╝
     """
     print(banner)
 
 
-def start_backend_server():
+def select_hardware():
+    """Show hardware selection menu"""
+    from src.core.hardware_selector import HardwareSelector
+    selector = HardwareSelector()
+    return selector.show_menu()
+
+
+def check_ollama_installed():
+    """Check if Ollama is installed and running"""
+    import subprocess
+    try:
+        # Try to check if Ollama is installed
+        result = subprocess.run(
+            ["ollama", "--version"],
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        if result.returncode == 0:
+            print(f"[Ollama] Versão instalada: {result.stdout.strip()}")
+            return True
+    except FileNotFoundError:
+        pass
+    except Exception as e:
+        print(f"[Ollama] Erro ao verificar: {e}")
+    
+    print("\n" + "=" * 60)
+    print("⚠️  OLLAMA NÃO ENCONTRADO!")
+    print("=" * 60)
+    print("\nPara usar IA local, você precisa instalar o Ollama:")
+    print("\n1. Acesse: https://ollama.com/download")
+    print("2. Baixe e instale o Ollama para Windows")
+    print("3. Após instalação, execute: ollama pull llama3.2")
+    print("4. Reinicie este aplicativo")
+    print("\n" + "=" * 60)
+    
+    input("\nPressione ENTER para continuar sem IA (modo limitado)...")
+    return False
+
+
+def start_backend_server(hardware_mode: str):
     """Inicia o servidor backend em uma thread separada"""
     from src.core.assistant import SkynetAssistant
     from src.server.websocket_server import start_server
@@ -172,7 +212,13 @@ def start_backend_server():
     async def run_server():
         print("\n[Skynet Desktop] Inicializando sistemas...")
         assistant = SkynetAssistant()
+        
+        # Pass hardware mode to AI client
         await assistant.initialize()
+        
+        # Set hardware mode on AI client if available
+        if hasattr(assistant, 'ai') and hasattr(assistant.ai, 'hardware_mode'):
+            assistant.ai.hardware_mode = hardware_mode
         
         print("[Skynet Desktop] Servidor backend iniciado")
         await start_server(assistant)
@@ -186,8 +232,24 @@ def start_backend_server():
 def main():
     print_banner()
     
+    # Hardware selection
+    hardware_mode = select_hardware()
+    
+    # Configure environment based on hardware
+    from src.core.hardware_selector import HardwareSelector
+    selector = HardwareSelector()
+    selector.selected_hardware = hardware_mode
+    selector.configure_environment()
+    
+    # Check if Ollama is installed
+    check_ollama_installed()
+    
     # Iniciar backend em thread separada
-    backend_thread = threading.Thread(target=start_backend_server, daemon=True)
+    backend_thread = threading.Thread(
+        target=start_backend_server, 
+        args=(hardware_mode,),
+        daemon=True
+    )
     backend_thread.start()
     
     # Aguardar backend inicializar
@@ -235,3 +297,4 @@ if __name__ == "__main__":
         print(f"\n[ERRO] {e}")
         import traceback
         traceback.print_exc()
+        input("\nPressione ENTER para sair...")
