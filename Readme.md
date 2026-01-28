@@ -297,10 +297,10 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ## Agradecimentos
 
-- [OpenAI Whisper](https://github.com/openai/whisper) 🎤 Reconhecimento de voz
-- [Google Gemini](https://ai.google.dev/) 🧠 IA generativa
-- [Three.js](https://threejs.org/) 🎨 Gráficos 3D
-- [FastAPI](https://fastapi.tiangolo.com/) ⚡ Framework web
+- [OpenAI Whisper](https://github.com/openai/whisper)  Reconhecimento de voz
+- [Google Gemini](https://ai.google.dev/)  IA generativa
+- [Three.js](https://threejs.org/)  Gráficos 3D
+- [FastAPI](https://fastapi.tiangolo.com/)  Framework web
 
 ---
 
