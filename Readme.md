@@ -38,26 +38,26 @@ Skynet é um assistente pessoal para PC que combina:
 
 ## Funcionalidades
 
-### 🤖 Inteligência Artificial Local (Ollama)
+###  Inteligência Artificial Local (Ollama)
 - **100% Gratuito** - Sem custos de API
 - **100% Privado** - Dados nunca saem do seu PC
 - **Offline** - Funciona sem internet após instalação
 - Modelos de alta qualidade (Llama 3.2, Mistral, etc.)
 - Suporte a GPU: NVIDIA (CUDA) e AMD (DirectML)
 
-### 🎤 Reconhecimento de Voz (Speech-to-Text)
+###  Reconhecimento de Voz (Speech-to-Text)
 - Modelo OpenAI Whisper rodando localmente
 - Aceleração GPU (NVIDIA/AMD)
 - 100% offline após download do modelo
 - Suporte a português brasileiro
 - Ignora ruídos de fundo
 
-### 🔊 Síntese de Voz (Text-to-Speech)
+###  Síntese de Voz (Text-to-Speech)
 - Edge TTS - Vozes neurais da Microsoft (qualidade premium)
 - Fallback para pyttsx3 (offline)
 - Voz em português brasileiro
 
-### 💻 Controle do Sistema
+###  Controle do Sistema
 | Comando | Ação |
 |---------|------|
 | Abrir aplicativos | Chrome, VS Code, Spotify, etc. |
@@ -68,12 +68,12 @@ Skynet é um assistente pessoal para PC que combina:
 | Screenshot | Captura de tela |
 | Digitar texto | Automação de teclado |
 
-### 🧠 Sistema de Memória
+###  Sistema de Memória
 - Curto prazo: Histórico da conversa atual
 - Longo prazo: Banco SQLite com preferências
 - Extração automática de informações do usuário
 
-### ✨ Visualização 3D
+###  Visualização 3D
 Sistema de partículas interativo com múltiplos modos:
 - **Esfera** - Partículas em formação esférica densa
 - **Átomo** - Órbitas atômicas
