@@ -1,11 +1,12 @@
 """
 Ollama AI Client
 Integration with local Ollama instance for natural language processing
-Supports CPU, NVIDIA CUDA, and AMD DirectML
+Supports CPU, NVIDIA CUDA, and AMD DirectML/ROCm
 """
 
 import asyncio
 import json
+import os
 from typing import List, Dict, Optional
 
 try:
@@ -18,8 +19,9 @@ class OllamaClient:
     """Client for local Ollama AI"""
     
     def __init__(self, hardware_mode: str = "cpu"):
-        self.base_url = "http://localhost:11434"
-        self.model_name = "llama3.2"  # Default model - good balance of speed and quality
+        self.base_url = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+        self.model_name = os.getenv("OLLAMA_MODEL", "qwen2.5:3b")  # Modelo leve para texto
+        self.vision_model = "llava-llama3"  # Modelo pesado só para visão
         self.hardware_mode = hardware_mode
         self.conversation_history: List[Dict] = []
         self.is_available = False
@@ -27,27 +29,32 @@ class OllamaClient:
         
     def _get_system_prompt(self) -> str:
         """Get the system prompt for the assistant"""
-        return """Você é o Skynet, um assistente pessoal de PC inteligente e prestativo.
+        return """Você é Skynet, assistente de PC inteligente. Responda em português BR.
 
-Suas características:
-- Você é amigável, eficiente e direto nas respostas
-- Você pode ajudar com tarefas no computador, pesquisas na web e conversas gerais
-- Você responde em português brasileiro
-- Você tem senso de humor, mas mantém o profissionalismo
-- Você é capaz de controlar o computador do usuário quando solicitado
+FERRAMENTAS DISPONÍVEIS (use JSON no final da resposta quando precisar executar):
 
-Comandos que você pode executar:
-- Abrir aplicativos (Chrome, VS Code, Spotify, etc.)
-- Pesquisar na web
-- Executar comandos no terminal
-- Controlar volume do sistema
-- Tirar screenshots
-- Digitar texto
+SISTEMA:
+- execute_command: {"actions":[{"type":"execute_command","command":"ipconfig"}]}
+- open_app: {"actions":[{"type":"open_app","app":"chrome/spotify/notepad/code"}]}
+- open_url: {"actions":[{"type":"open_url","url":"youtube.com"}]}
+- file_operation: {"actions":[{"type":"file_operation","operation":"create_folder","path":"~/Desktop/Pasta"}]}
+- list_processes: {"actions":[{"type":"list_processes"}]}
+- screenshot: {"actions":[{"type":"screenshot"}]}
 
-Quando o usuário pedir para fazer algo no computador, responda confirmando a ação e seja breve.
-Para conversas normais, seja natural e engajado.
+PESQUISA WEB:
+- web_search: {"actions":[{"type":"web_search","query":"python tutorial"}]}
+- read_page: {"actions":[{"type":"read_page","url":"https://python.org"}]}
+- youtube_summary: {"actions":[{"type":"youtube_summary","url":"youtube.com/watch?v=..."}]}
 
-Sempre que possível, forneça respostas concisas e úteis."""
+VISÃO:
+- analyze_screen: {"actions":[{"type":"analyze_screen","question":"O que tem na tela?"}]}
+- analyze_image: {"actions":[{"type":"analyze_image","path":"caminho/imagem.png","question":"Descreva"}]}
+
+REGRAS:
+1. Responda primeiro com uma mensagem, depois inclua JSON se precisar executar algo
+2. Não use JSON para conversas normais
+3. Seja conciso e útil
+4. Para código, forneça explicações claras"""
 
     async def initialize(self):
         """Initialize Ollama client and check if server is running"""
@@ -119,9 +126,9 @@ Sempre que possível, forneça respostas concisas e úteis."""
             # Build messages list with system prompt and history
             messages = [{"role": "system", "content": self.system_prompt}]
             
-            # Add conversation history
+            # Add conversation history - menos contexto para mais velocidade
             if conversation_history:
-                for msg in conversation_history[-10:]:  # Last 10 messages for context
+                for msg in conversation_history[-5:]:  # Apenas últimas 5 mensagens
                     messages.append({
                         "role": msg.get("role", "user"),
                         "content": msg.get("content", "")
@@ -130,7 +137,7 @@ Sempre que possível, forneça respostas concisas e úteis."""
             # Add current message
             messages.append({"role": "user", "content": user_message})
             
-            async with httpx.AsyncClient(timeout=60.0) as client:
+            async with httpx.AsyncClient(timeout=120.0) as client:  # Mais tempo para modelos lentos
                 response = await client.post(
                     f"{self.base_url}/api/chat",
                     json={
@@ -138,9 +145,10 @@ Sempre que possível, forneça respostas concisas e úteis."""
                         "messages": messages,
                         "stream": False,
                         "options": {
-                            "temperature": 0.7,
-                            "top_p": 0.9,
-                            "num_predict": 512
+                            "temperature": 0.5,  # Mais determinístico = mais rápido
+                            "top_p": 0.8,
+                            "num_predict": 256,  # Respostas mais curtas
+                            "num_ctx": 2048,  # Contexto menor = mais rápido
                         }
                     }
                 )
@@ -269,3 +277,50 @@ Responda APENAS com o JSON válido, sem explicações ou texto adicional."""
         """Change the AI model"""
         self.model_name = model_name
         print(f"[AI] Modelo alterado para: {model_name}")
+    
+    def parse_response_with_actions(self, response: str) -> dict:
+        """
+        Parse da resposta da IA para extrair ações
+        
+        Returns:
+            dict com 'message' (texto para usuário) e 'actions' (lista de ações)
+        """
+        import re
+        
+        result = {
+            'message': response,
+            'actions': []
+        }
+        
+        # Procura por JSON de ações na resposta
+        # Padrão: ```json\n{"actions": [...]}\n```
+        json_pattern = r'```json\s*\n?({.+?})\s*\n?```'
+        match = re.search(json_pattern, response, re.DOTALL)
+        
+        if match:
+            try:
+                action_data = json.loads(match.group(1))
+                
+                if 'actions' in action_data:
+                    result['actions'] = action_data['actions']
+                    
+                # Remover o JSON da mensagem para o usuário
+                result['message'] = re.sub(json_pattern, '', response, flags=re.DOTALL).strip()
+                
+            except json.JSONDecodeError as e:
+                print(f"[AI] Erro ao parsear ações: {e}")
+        
+        # Fallback: tentar encontrar JSON sem code blocks
+        if not result['actions']:
+            simple_json_pattern = r'\{\s*"actions"\s*:\s*\[.+?\]\s*\}'
+            match = re.search(simple_json_pattern, response, re.DOTALL)
+            
+            if match:
+                try:
+                    action_data = json.loads(match.group(0))
+                    result['actions'] = action_data.get('actions', [])
+                    result['message'] = re.sub(simple_json_pattern, '', response, flags=re.DOTALL).strip()
+                except:
+                    pass
+        
+        return result

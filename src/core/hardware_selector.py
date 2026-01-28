@@ -96,20 +96,25 @@ class HardwareSelector:
             # AMD option
             if self.available_hardware.get("amd"):
                 gpu_name = self.available_hardware.get("amd_name", "AMD GPU")
-                print(f"║  [3] AMD GPU - {gpu_name[:43]:<43} ║")
+                # Truncate name to fit
+                if len(gpu_name) > 43:
+                    gpu_name = gpu_name[:40] + "..."
+                print(f"║  [3] AMD GPU - {gpu_name:<43} ║")
             else:
                 print("║  [3] AMD GPU (não detectada)                                 ║")
                 
             print("╠══════════════════════════════════════════════════════════════╣")
-            print("║  [S] Salvar escolha e não perguntar novamente                ║")
+            print("║  [R] Resetar configuração e escolher novamente               ║")
             print("╚══════════════════════════════════════════════════════════════╝")
             
             choice = input("\nEscolha uma opção [1/2/3]: ").strip().lower()
             
-            save_choice = False
-            if 's' in choice:
-                save_choice = True
-                choice = choice.replace('s', '').strip()
+            if choice == "r":
+                # Reset config
+                if self.CONFIG_FILE.exists():
+                    self.CONFIG_FILE.unlink()
+                print("\n✅ Configuração resetada!")
+                continue
             
             if choice == "1":
                 self.selected_hardware = "cpu"
@@ -117,24 +122,32 @@ class HardwareSelector:
             elif choice == "2":
                 if self.available_hardware.get("nvidia"):
                     self.selected_hardware = "nvidia"
-                    break
                 else:
-                    print("\n⚠️  GPU NVIDIA não detectada. Instale os drivers NVIDIA primeiro.")
+                    # Allow forcing NVIDIA even if not detected
+                    confirm = input("\n⚠️  GPU NVIDIA não detectada. Forçar mesmo assim? [s/N]: ").strip().lower()
+                    if confirm == 's':
+                        self.selected_hardware = "nvidia"
+                    else:
+                        continue
+                break
             elif choice == "3":
                 if self.available_hardware.get("amd"):
                     self.selected_hardware = "amd"
-                    break
                 else:
-                    print("\n⚠️  GPU AMD não detectada. Verifique os drivers AMD.")
+                    # Allow forcing AMD even if not detected
+                    confirm = input("\n⚠️  GPU AMD não detectada. Forçar mesmo assim? [s/N]: ").strip().lower()
+                    if confirm == 's':
+                        self.selected_hardware = "amd"
+                    else:
+                        continue
+                break
             else:
                 print("\n❌ Opção inválida. Digite 1, 2 ou 3.")
         
-        # Save if requested
-        if save_choice or input("\nSalvar esta escolha para próximas vezes? [s/N]: ").lower() == 's':
-            self._save_config(self.selected_hardware)
-            print(f"✅ Configuração salva: {self.selected_hardware}")
-        
+        # Always save the choice
+        self._save_config(self.selected_hardware)
         print(f"\n✅ Hardware selecionado: {self.selected_hardware.upper()}")
+        print(f"✅ Configuração salva! (use opção R para resetar)")
         return self.selected_hardware
         
     def _print_banner(self):
@@ -170,15 +183,30 @@ class HardwareSelector:
         if self.selected_hardware == "nvidia":
             # NVIDIA CUDA - Ollama uses CUDA by default when available
             env_vars["CUDA_VISIBLE_DEVICES"] = "0"
+            env_vars["OLLAMA_GPU_DRIVER"] = "cuda"
+            # Remove any AMD-specific settings
+            if "HSA_OVERRIDE_GFX_VERSION" in os.environ:
+                del os.environ["HSA_OVERRIDE_GFX_VERSION"]
             
         elif self.selected_hardware == "amd":
-            # AMD ROCm/DirectML
-            # On Windows, Ollama uses DirectML for AMD GPUs
-            env_vars["HSA_OVERRIDE_GFX_VERSION"] = "10.3.0"  # Common compatibility setting
+            # AMD ROCm on Linux or DirectML on Windows
+            if sys.platform == "win32":
+                # Windows uses DirectML through Ollama's built-in support
+                env_vars["OLLAMA_GPU_DRIVER"] = "auto"  # Let Ollama auto-detect
+            else:
+                # Linux uses ROCm
+                env_vars["HSA_OVERRIDE_GFX_VERSION"] = "10.3.0"  # Common compatibility
+                env_vars["OLLAMA_GPU_DRIVER"] = "rocm"
+            # Disable CUDA for AMD
+            env_vars["CUDA_VISIBLE_DEVICES"] = ""
             
         else:  # CPU
             # Force CPU-only mode
             env_vars["CUDA_VISIBLE_DEVICES"] = ""
+            env_vars["OLLAMA_GPU_DRIVER"] = "cpu"
+            # Remove any GPU-specific settings
+            if "HSA_OVERRIDE_GFX_VERSION" in os.environ:
+                del os.environ["HSA_OVERRIDE_GFX_VERSION"]
             
         return env_vars
         
@@ -187,6 +215,22 @@ class HardwareSelector:
         env_vars = self.get_ollama_env_vars()
         for key, value in env_vars.items():
             os.environ[key] = value
+            
+        # Configure PyTorch/Whisper device
+        if self.selected_hardware == "nvidia":
+            os.environ["WHISPER_DEVICE"] = "cuda"
+            os.environ["TORCH_DEVICE"] = "cuda"
+        elif self.selected_hardware == "amd":
+            if sys.platform == "win32":
+                os.environ["WHISPER_DEVICE"] = "dml"  # DirectML
+                os.environ["TORCH_DEVICE"] = "dml"
+            else:
+                os.environ["WHISPER_DEVICE"] = "cuda"  # ROCm uses CUDA API
+                os.environ["TORCH_DEVICE"] = "cuda"
+        else:
+            os.environ["WHISPER_DEVICE"] = "cpu"
+            os.environ["TORCH_DEVICE"] = "cpu"
+            
         print(f"[Hardware] Ambiente configurado para: {self.selected_hardware.upper()}")
 
 

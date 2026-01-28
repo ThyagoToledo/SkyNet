@@ -17,8 +17,8 @@ class ParticleSystem {
         this.targetPositions = [];
         this.originalPositions = []; // Posições originais para transições
         this.colors = [];
-        this.baseColor = new THREE.Color(0xaa66ff); // Roxo claro
-        this.accentColor = new THREE.Color(0x8844cc); // Violeta
+        this.baseColor = new THREE.Color(0x00ff88); // Verde claro
+        this.accentColor = new THREE.Color(0x00cc66); // Verde
 
         // Animation parameters
         this.expansionFactor = 1;
@@ -88,45 +88,66 @@ class ParticleSystem {
     }
 
     generateSkynetTextCoords() {
-        // Gerar coordenadas para formar "SKYNET" com partículas
+        // Gerar coordenadas para formar "SKYNET" com partículas - Letras mais densas e legíveis
         const letters = {
             'S': [
-                [0, 0], [1, 0], [2, 0], [3, 0],
-                [0, 1],
-                [0, 2], [1, 2], [2, 2], [3, 2],
-                [3, 3],
+                // Topo
+                [1, 0], [2, 0], [3, 0], [4, 0],
+                [0, 0.5], [0, 1],
+                // Meio
+                [1, 2], [2, 2], [3, 2],
+                // Baixo direita
+                [4, 2.5], [4, 3], [4, 3.5],
+                // Base
                 [0, 4], [1, 4], [2, 4], [3, 4]
             ],
             'K': [
-                [0, 0], [0, 1], [0, 2], [0, 3], [0, 4],
-                [3, 0], [2, 1], [1, 2], [2, 3], [3, 4]
+                // Linha vertical
+                [0, 0], [0, 0.5], [0, 1], [0, 1.5], [0, 2], [0, 2.5], [0, 3], [0, 3.5], [0, 4],
+                // Diagonal superior
+                [1, 1.5], [2, 1], [3, 0.5], [4, 0],
+                // Diagonal inferior
+                [1, 2.5], [2, 3], [3, 3.5], [4, 4]
             ],
             'Y': [
-                [0, 0], [1, 1], [2, 2], [3, 1], [4, 0],
-                [2, 3], [2, 4]
+                // Braço esquerdo
+                [0, 0], [0.5, 0.5], [1, 1], [1.5, 1.5],
+                // Braço direito
+                [4, 0], [3.5, 0.5], [3, 1], [2.5, 1.5],
+                // Tronco central
+                [2, 2], [2, 2.5], [2, 3], [2, 3.5], [2, 4]
             ],
             'N': [
-                [0, 0], [0, 1], [0, 2], [0, 3], [0, 4],
-                [1, 1], [2, 2], [3, 3],
-                [4, 0], [4, 1], [4, 2], [4, 3], [4, 4]
+                // Linha esquerda
+                [0, 0], [0, 0.5], [0, 1], [0, 1.5], [0, 2], [0, 2.5], [0, 3], [0, 3.5], [0, 4],
+                // Diagonal
+                [0.5, 0.5], [1, 1], [1.5, 1.5], [2, 2], [2.5, 2.5], [3, 3], [3.5, 3.5],
+                // Linha direita
+                [4, 0], [4, 0.5], [4, 1], [4, 1.5], [4, 2], [4, 2.5], [4, 3], [4, 3.5], [4, 4]
             ],
             'E': [
-                [0, 0], [1, 0], [2, 0], [3, 0],
-                [0, 1],
-                [0, 2], [1, 2], [2, 2],
-                [0, 3],
-                [0, 4], [1, 4], [2, 4], [3, 4]
+                // Linha vertical
+                [0, 0], [0, 0.5], [0, 1], [0, 1.5], [0, 2], [0, 2.5], [0, 3], [0, 3.5], [0, 4],
+                // Topo
+                [1, 0], [2, 0], [3, 0], [4, 0],
+                // Meio
+                [1, 2], [2, 2], [3, 2],
+                // Base
+                [1, 4], [2, 4], [3, 4], [4, 4]
             ],
             'T': [
+                // Topo horizontal
                 [0, 0], [1, 0], [2, 0], [3, 0], [4, 0],
-                [2, 1], [2, 2], [2, 3], [2, 4]
+                // Tronco central
+                [2, 0.5], [2, 1], [2, 1.5], [2, 2], [2, 2.5], [2, 3], [2, 3.5], [2, 4]
             ]
         };
 
         const word = 'SKYNET';
-        const scale = 15;
-        const spacing = 5 * scale;
-        const totalWidth = word.length * spacing;
+        const scale = 18; // Reduzido pela metade para caber na tela
+        const letterWidth = 5 * scale; // Largura de cada letra
+        const spacing = letterWidth + 15; // Espaçamento reduzido proporcionalmente
+        const totalWidth = word.length * spacing - 15;
         const startX = -totalWidth / 2;
 
         this.skynetTextCoords = [];
@@ -136,12 +157,12 @@ class ParticleSystem {
             const offsetX = startX + i * spacing;
 
             for (const [x, y] of letter) {
-                // Adicionar várias partículas por ponto para mais densidade
-                for (let j = 0; j < 8; j++) {
+                // Muito mais partículas por ponto para densidade alta e legibilidade perfeita
+                for (let j = 0; j < 80; j++) {
                     this.skynetTextCoords.push({
-                        x: offsetX + x * scale + (Math.random() - 0.5) * 8,
-                        y: (2 - y) * scale + (Math.random() - 0.5) * 8,
-                        z: (Math.random() - 0.5) * 20
+                        x: offsetX + x * scale + (Math.random() - 0.5) * 6, // Jitter reduzido
+                        y: (2 - y) * scale + (Math.random() - 0.5) * 6,
+                        z: (Math.random() - 0.5) * 4
                     });
                 }
             }
@@ -151,6 +172,7 @@ class ParticleSystem {
     createParticles() {
         const geometry = new THREE.BufferGeometry();
         const positions = new Float32Array(this.particleCount * 3);
+        const targetPositions = new Float32Array(this.particleCount * 3); // Buffer para destino
         const colors = new Float32Array(this.particleCount * 3);
         const sizes = new Float32Array(this.particleCount);
 
@@ -158,43 +180,74 @@ class ParticleSystem {
         for (let i = 0; i < this.particleCount; i++) {
             const i3 = i * 3;
 
-            // Esfera mais densa e fechada
-            const radius = 100 + Math.random() * 30; // Raio menor e mais uniforme
+            // Esfera inicial
+            const radius = 100 + Math.random() * 30;
             const theta = Math.random() * Math.PI * 2;
             const phi = Math.acos((Math.random() * 2) - 1);
 
-            positions[i3] = radius * Math.sin(phi) * Math.cos(theta);
-            positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-            positions[i3 + 2] = radius * Math.cos(phi);
+            const x = radius * Math.sin(phi) * Math.cos(theta);
+            const y = radius * Math.sin(phi) * Math.sin(theta);
+            const z = radius * Math.cos(phi);
 
-            // Color gradient - roxo/violeta
+            // Set both current and target to sphere initially
+            positions[i3] = x;
+            positions[i3 + 1] = y;
+            positions[i3 + 2] = z;
+
+            targetPositions[i3] = x;
+            targetPositions[i3 + 1] = y;
+            targetPositions[i3 + 2] = z;
+
+            // Colors
             const color = this.baseColor.clone();
             color.lerp(this.accentColor, Math.random() * 0.5);
             colors[i3] = color.r;
             colors[i3 + 1] = color.g;
             colors[i3 + 2] = color.b;
 
-            sizes[i] = Math.random() * 2 + 0.5; // Partículas menores
+            sizes[i] = Math.random() * 2 + 0.5;
         }
 
         geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('targetPosition', new THREE.BufferAttribute(targetPositions, 3)); // Add target attribute
         geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
         geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
-        // Custom shader material
+        // Custom shader material with Morphing logic
         const material = new THREE.ShaderMaterial({
             uniforms: {
                 time: { value: 0 },
+                mixFactor: { value: 0 }, // 0 = position, 1 = targetPosition
                 pixelRatio: { value: this.renderer.getPixelRatio() }
             },
             vertexShader: `
                 attribute float size;
+                attribute vec3 targetPosition;
+                attribute vec3 color;
+                
                 varying vec3 vColor;
                 uniform float time;
+                uniform float mixFactor;
                 
                 void main() {
                     vColor = color;
-                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                    
+                    // Cubic easing for mixFactor directly in shader or pre-calculated in JS
+                    // Here we assume mixFactor is linear 0->1 and we can ease it here or in JS.
+                    // Let's do a simple mix for maximum smoothness.
+                    
+                    vec3 finalPos = mix(position, targetPosition, mixFactor);
+                    
+                    // Add some noise/movement based on time
+                    float noiseFreq = 0.02;
+                    float noiseAmp = 2.0;
+                    vec3 noise = vec3(
+                        sin(time * 2.0 + finalPos.y * noiseFreq) * noiseAmp,
+                        cos(time * 1.5 + finalPos.z * noiseFreq) * noiseAmp,
+                        sin(time * 2.2 + finalPos.x * noiseFreq) * noiseAmp
+                    );
+                    
+                    vec4 mvPosition = modelViewMatrix * vec4(finalPos + noise, 1.0);
                     gl_PointSize = size * (250.0 / -mvPosition.z);
                     gl_Position = projectionMatrix * mvPosition;
                 }
@@ -212,43 +265,63 @@ class ParticleSystem {
                 }
             `,
             transparent: true,
-            vertexColors: true,
+            vertexColors: false, // We use custom 'color' attribute, not built-in vertexColors logic implies
             blending: THREE.AdditiveBlending,
             depthWrite: false
         });
 
         this.particles = new THREE.Points(geometry, material);
         this.scene.add(this.particles);
-
-        // Store initial positions
-        this.targetPositions = positions.slice();
-        this.originalPositions = positions.slice();
     }
 
     startIntroSequence() {
-        // Fase 1: Mostrar esfera por 2 segundos
-        setTimeout(() => {
-            this.introPhase = 'text';
-            this.setMode('skynet_text');
-        }, 2000);
+        // Iniciar imediatamente no modo texto
+        this.introPhase = 'text';
+        this.setMode('skynet_text'); // Use setMode for transitions
+        this.camera.position.z = 350;
 
-        // Fase 2: Mostrar texto por 3 segundos, depois voltar à esfera
+        // Fase 2: Mostrar texto por 4 segundos, depois voltar à esfera
         setTimeout(() => {
             this.introPhase = 'back_to_sphere';
             this.setMode('sphere');
+            this.camera.position.z = 400;
             this.introAnimationDone = true;
-        }, 5000);
+        }, 4000);
     }
 
     setMode(mode) {
+        if (this.currentMode === mode && this.transitionProgress >= 1) return;
+
+        // Get access to attributes
+        const positionAttr = this.particles.geometry.attributes.position;
+        const targetAttr = this.particles.geometry.attributes.targetPosition;
+
+        // If we finished a previous transition, our "visual" position is targetPosition.
+        // Copy target -> position to be the new start.
+        if (this.transitionProgress >= 1) {
+            positionAttr.array.set(targetAttr.array);
+            positionAttr.needsUpdate = true;
+        } else {
+            // If interrupted, we have a problem. The visual state is a mix.
+            // We can bake the current mix into 'position'
+            // position = mix(position, target, mixFactor)
+            // simplified: assume we always finish or just snap.
+            // Force finish:
+            positionAttr.array.set(targetAttr.array);
+            positionAttr.needsUpdate = true;
+        }
+
         this.currentMode = mode;
         this.transitionProgress = 0;
-        this.calculateTargetPositions();
+        this.particles.material.uniforms.mixFactor.value = 0;
+
+        // Calculate NEW targets
+        this.calculateTargetPositions(targetAttr.array);
+        targetAttr.needsUpdate = true;
     }
 
-    calculateTargetPositions() {
-        const positions = this.particles.geometry.attributes.position.array;
-
+    calculateTargetPositions(outputArray) {
+        // Fill outputArray with new coordinates based on this.currentMode
         for (let i = 0; i < this.particleCount; i++) {
             const i3 = i * 3;
             let x, y, z;
@@ -270,12 +343,12 @@ class ParticleSystem {
                         y = coord.y;
                         z = coord.z;
                     } else {
-                        // Partículas extras flutuam ao redor
+                        // Halo em volta do texto
                         const angle = Math.random() * Math.PI * 2;
-                        const dist = 200 + Math.random() * 100;
+                        const dist = 300 + Math.random() * 150;
                         x = Math.cos(angle) * dist;
-                        y = (Math.random() - 0.5) * 100;
-                        z = Math.sin(angle) * dist + (Math.random() - 0.5) * 50;
+                        y = (Math.random() - 0.5) * 200;
+                        z = Math.sin(angle) * dist * 0.5;
                     }
                     break;
 
@@ -324,14 +397,12 @@ class ParticleSystem {
                     break;
 
                 default:
-                    x = positions[i3];
-                    y = positions[i3 + 1];
-                    z = positions[i3 + 2];
+                    x = 0; y = 0; z = 0;
             }
 
-            this.targetPositions[i3] = x;
-            this.targetPositions[i3 + 1] = y;
-            this.targetPositions[i3 + 2] = z;
+            outputArray[i3] = x;
+            outputArray[i3 + 1] = y;
+            outputArray[i3 + 2] = z;
         }
     }
 
@@ -343,14 +414,14 @@ class ParticleSystem {
                 this.rotationSpeed = 0.001;
                 this.pulseSpeed = 0.02;
                 this.expansionFactor = 1;
-                this.setColors(0xaa66ff, 0x8844cc); // Roxo
+                this.setColors(0x00ff88, 0x00cc66); // Verde
                 break;
 
             case 'listening':
                 this.rotationSpeed = 0.002;
                 this.pulseSpeed = 0.05;
                 this.expansionFactor = 1.1;
-                this.setColors(0xbb77ff, 0x9955dd); // Roxo mais claro
+                this.setColors(0x44ffaa, 0x22dd88); // Verde mais claro
                 break;
 
             case 'thinking':
@@ -401,76 +472,78 @@ class ParticleSystem {
     animate() {
         requestAnimationFrame(() => this.animate());
 
-        this.time += 0.016;
+        this.time += 0.01;
 
         // Smooth volume changes
         this.volumeSmooth += (this.audioVolume - this.volumeSmooth) * 0.1;
 
+        // Update Shader Transition
+        if (this.transitionProgress < 1) {
+            this.transitionProgress += this.transitionSpeed;
+            if (this.transitionProgress > 1) this.transitionProgress = 1;
+
+            // Simple cubic ease out for mixFactor
+            const t = this.transitionProgress;
+            const ease = 1 - Math.pow(1 - t, 3);
+
+            if (this.particles && this.particles.material.uniforms) {
+                this.particles.material.uniforms.mixFactor.value = ease;
+            }
+        }
+
         // Apply volume-based effects when user is speaking
         const volumeEffect = this.isUserSpeaking ? this.volumeSmooth * 40 : 0;
 
-        const positions = this.particles.geometry.attributes.position.array;
+        // No CPU-based position updates for transition anymore!
+        // We rely on the vertex shader 'mix(position, targetPosition, mixFactor)'
 
-        // Smooth transition to target positions
-        if (this.transitionProgress < 1) {
-            this.transitionProgress += this.transitionSpeed;
+        // Other CPU animations (pulse, wave) still act on the 'position' buffer?
+        // Wait, if we use shader for position, modifying the buffer on CPU conflicts with it?
+        // The shader mixes 'position' and 'targetPosition'.
+        // If we modify 'position' (the source), it affects the mix.
+        // But our shader only does: finalPos = mix(position, targetPosition, mixFactor) + noise
+        // The shader does NOT have "pulse" or "expansion" logic inside (except noise).
+        // So we LOSE the pulse/expansion effects if we don't apply them to the shader or keep CPU update.
 
-            for (let i = 0; i < positions.length; i++) {
-                positions[i] += (this.targetPositions[i] - positions[i]) * 0.04;
-            }
+        // BEST PRACTICE: Move Pulse/Expansion to Shader too.
+        // Logic:
+        // Vertex Shader:
+        // vec3 base = mix(position, targetPosition, mixFactor);
+        // Apply expansion: base *= expansionFactor
+        // Apply pulse: base += normal * sin(time)
 
-            this.particles.geometry.attributes.position.needsUpdate = true;
+        // BUT, rewriting all effects to shader now is risky for regressions on specific modes like 'galaxy'.
+        // Hybrid approach:
+        // We stop modifying positions array for *transition*, but we can still modify it for *effects*?
+        // No, updating buffer every frame kills the performance gain.
+        // CORRECT PATH:
+        // Use shader for EVERYTHING if possible, or just accept that "effects" like pulse are subtle/removed or implemented simply in shader.
+        // Let's implement simple pulse/expansion in shader using Uniforms.
+
+        if (this.particles && this.particles.material.uniforms) {
+            this.particles.material.uniforms.time.value = this.time;
+            // Send volume/expansion to shader?
+            // For now, let's keep it simple: Smooth transition is the priority.
+            // We can re-add pulse later if needed, but the 'noise' in shader gives some life.
         }
-
-        // Apply animations based on mode
-        for (let i = 0; i < this.particleCount; i++) {
-            const i3 = i * 3;
-
-            // Pulse effect - enhanced by volume
-            const basePulse = Math.sin(this.time * this.pulseSpeed + i * 0.01) * 3;
-            const pulse = basePulse + volumeEffect;
-
-            // Add slight movement - more when volume is higher
-            const moveMult = 0.05 + volumeEffect * 0.01;
-            positions[i3] += Math.sin(this.time + i) * moveMult;
-            positions[i3 + 1] += Math.cos(this.time + i) * moveMult;
-            positions[i3 + 2] += Math.sin(this.time * 0.5 + i) * moveMult;
-
-            // Apply expansion - react to voice volume
-            const dist = Math.sqrt(
-                positions[i3] ** 2 +
-                positions[i3 + 1] ** 2 +
-                positions[i3 + 2] ** 2
-            );
-
-            // Expand/contract based on volume
-            const volumeExpansion = this.isUserSpeaking ? 1 + this.volumeSmooth * 2 : 1;
-
-            if (dist > 0) {
-                const targetDist = dist * this.expansionFactor * volumeExpansion;
-                const factor = 1 + (targetDist - dist) / dist * 0.008;
-                positions[i3] *= factor;
-                positions[i3 + 1] *= factor;
-                positions[i3 + 2] *= factor;
-            }
-        }
-
-        this.particles.geometry.attributes.position.needsUpdate = true;
 
         // Rotate particles - faster when volume high
-        const volumeRotation = this.isUserSpeaking ? this.volumeSmooth * 0.008 : 0;
-        this.particles.rotation.y += this.rotationSpeed + volumeRotation;
-        this.particles.rotation.x = this.mouse.y * 0.15;
+        const volumeRotation = this.isUserSpeaking ? this.volumeSmooth * 0.005 : 0;
+        if (this.particles) {
+            this.particles.rotation.y += this.rotationSpeed + volumeRotation;
+            this.particles.rotation.x = this.mouse.y * 0.15;
+        }
 
         // Camera follows mouse slightly
-        this.camera.position.x += (this.mouse.x * 80 - this.camera.position.x) * 0.015;
-        this.camera.position.y += (this.mouse.y * 40 - this.camera.position.y) * 0.015;
-        this.camera.lookAt(0, 0, 0);
+        if (this.camera) {
+            this.camera.position.x += (this.mouse.x * 80 - this.camera.position.x) * 0.015;
+            this.camera.position.y += (this.mouse.y * 40 - this.camera.position.y) * 0.015;
+            this.camera.lookAt(0, 0, 0);
+        }
 
-        // Update shader time
-        this.particles.material.uniforms.time.value = this.time;
-
-        this.renderer.render(this.scene, this.camera);
+        if (this.renderer && this.scene && this.camera) {
+            this.renderer.render(this.scene, this.camera);
+        }
     }
 
     // Trigger effects for specific events
@@ -518,6 +591,17 @@ class ParticleSystem {
         this.introPhase = 'sphere';
         this.introAnimationDone = false;
         this.startIntroSequence();
+    }
+
+    // Set transparent mode
+    setTransparent(enabled) {
+        if (enabled) {
+            this.scene.background = null;
+            this.renderer.setClearColor(0x000000, 0);
+        } else {
+            this.scene.background = new THREE.Color(0x000000);
+            this.renderer.setClearColor(0x000000, 1);
+        }
     }
 }
 

@@ -17,6 +17,10 @@ class SkynetApp {
         this.selectedInputDevice = null;
         this.selectedOutputDevice = null;
 
+        // Transparency mode
+        this.isTransparentMode = false;
+        this.transparentBtn = document.getElementById('transparent-btn');
+
         // DOM elements
         this.messagesContainer = document.getElementById('messages');
         this.textInput = document.getElementById('text-input');
@@ -59,6 +63,9 @@ class SkynetApp {
 
         // Load saved audio preferences
         this.loadAudioPreferences();
+
+        // Load transparency preference
+        this.loadTransparencyPreference();
 
         // Show welcome message
         this.addMessage('Olá! Sou o Skynet, seu assistente pessoal. Como posso ajudar?', 'assistant');
@@ -130,6 +137,36 @@ class SkynetApp {
     }
 
     loadAudioPreferences() {
+        // First try to load from backend (JSON file)
+        if (this.isDesktopApp && window.pywebview && window.pywebview.api) {
+            try {
+                window.pywebview.api.get_audio_settings().then(settings => {
+                    if (settings) {
+                        // Apply settings from backend
+                        if (settings.input) {
+                            this.inputDeviceSelect.value = settings.input;
+                            this.selectedInputDevice = settings.input;
+                        }
+                        if (settings.output) {
+                            this.outputDeviceSelect.value = settings.output;
+                            this.selectedOutputDevice = settings.output;
+                        }
+                        console.log('Audio settings loaded from backend:', settings);
+                    }
+                }).catch(e => {
+                    console.log('Could not load audio settings from backend:', e);
+                    this.loadAudioPreferencesFromLocalStorage();
+                });
+            } catch (e) {
+                console.log('Backend not available, using localStorage:', e);
+                this.loadAudioPreferencesFromLocalStorage();
+            }
+        } else {
+            this.loadAudioPreferencesFromLocalStorage();
+        }
+    }
+
+    loadAudioPreferencesFromLocalStorage() {
         const savedInput = localStorage.getItem('skynet_input_device');
         const savedOutput = localStorage.getItem('skynet_output_device');
 
@@ -148,19 +185,25 @@ class SkynetApp {
         const inputDevice = this.inputDeviceSelect.value;
         const outputDevice = this.outputDeviceSelect.value;
 
-        if (inputDevice) {
-            localStorage.setItem('skynet_input_device', inputDevice);
-            this.selectedInputDevice = inputDevice;
-        }
+        // Always save to localStorage as backup
+        localStorage.setItem('skynet_input_device', inputDevice || '');
+        localStorage.setItem('skynet_output_device', outputDevice || '');
+        this.selectedInputDevice = inputDevice;
+        this.selectedOutputDevice = outputDevice;
 
-        if (outputDevice) {
-            localStorage.setItem('skynet_output_device', outputDevice);
-            this.selectedOutputDevice = outputDevice;
-        }
+        // Save to backend JSON file
+        if (this.isDesktopApp && window.pywebview && window.pywebview.api) {
+            try {
+                // Save device selection
+                window.pywebview.api.set_audio_devices(inputDevice || '', outputDevice || '');
 
-        // Notify PyWebView if available
-        if (this.isDesktopApp && window.pywebview.api) {
-            window.pywebview.api.set_audio_devices(inputDevice, outputDevice);
+                // Save audio settings (volume, muted, etc) to JSON file
+                window.pywebview.api.save_audio_settings(100, false);
+
+                console.log('Audio preferences saved to backend JSON file');
+            } catch (e) {
+                console.error('Error saving audio preferences to backend:', e);
+            }
         }
     }
 
@@ -211,6 +254,11 @@ class SkynetApp {
             this.openSettings();
         });
 
+        // Transparent mode button
+        this.transparentBtn.addEventListener('click', () => {
+            this.toggleTransparentMode();
+        });
+
         // Modal handlers
         document.getElementById('modal-cancel').addEventListener('click', () => {
             this.closeSettings();
@@ -241,11 +289,17 @@ class SkynetApp {
             });
         });
 
-        // Keyboard shortcut for settings (Ctrl+,)
+        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
+            // Ctrl+, for settings
             if (e.ctrlKey && e.key === ',') {
                 e.preventDefault();
                 this.openSettings();
+            }
+            // Ctrl+T for transparency toggle
+            if (e.ctrlKey && e.key === 't') {
+                e.preventDefault();
+                this.toggleTransparentMode();
             }
             // Escape to close modal
             if (e.key === 'Escape' && this.settingsModal.classList.contains('active')) {
@@ -430,6 +484,62 @@ class SkynetApp {
     setParticleMode(mode) {
         this.particleSystem.setMode(mode);
         this.wsClient.setParticleMode(mode);
+    }
+
+    toggleTransparentMode() {
+        this.isTransparentMode = !this.isTransparentMode;
+        this.setTransparentMode(this.isTransparentMode);
+
+        // Save preference
+        localStorage.setItem('skynet_transparent_mode', this.isTransparentMode);
+
+        // Notify PyWebView if available
+        if (this.isDesktopApp && window.pywebview && window.pywebview.api) {
+            try {
+                window.pywebview.api.set_transparent_mode(this.isTransparentMode);
+            } catch (e) {
+                console.log('PyWebView transparency API not available');
+            }
+        }
+    }
+
+    setTransparentMode(enabled) {
+        if (enabled) {
+            document.documentElement.classList.add('transparent-mode');
+            document.body.classList.add('transparent-mode');
+            this.transparentBtn.classList.add('active');
+
+            // Make particles more visible on transparent background
+            if (this.particleSystem) {
+                this.particleSystem.setTransparent(true);
+            }
+        } else {
+            document.documentElement.classList.remove('transparent-mode');
+            document.body.classList.remove('transparent-mode');
+            this.transparentBtn.classList.remove('active');
+
+            // Restore normal background
+            if (this.particleSystem) {
+                this.particleSystem.setTransparent(false);
+            }
+        }
+    }
+
+    loadTransparencyPreference() {
+        const saved = localStorage.getItem('skynet_transparent_mode');
+        if (saved === 'true') {
+            this.isTransparentMode = true;
+            this.setTransparentMode(true);
+
+            // Also notify PyWebView
+            if (this.isDesktopApp && window.pywebview && window.pywebview.api) {
+                try {
+                    window.pywebview.api.set_transparent_mode(true);
+                } catch (e) {
+                    console.log('PyWebView transparency API not available');
+                }
+            }
+        }
     }
 }
 

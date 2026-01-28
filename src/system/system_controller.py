@@ -327,3 +327,244 @@ class SystemController:
             return "Por segurança, não vou desligar automaticamente. Use o menu Iniciar."
             
         return "Comando de energia não reconhecido."
+    
+    # ===========================================
+    # NOVAS FUNÇÕES PARA INTEGRAÇÃO COM IA
+    # ===========================================
+    
+    async def execute_smart_command(self, command: str, safe_mode: bool = True) -> str:
+        """
+        Executa um comando no terminal de forma inteligente.
+        
+        Args:
+            command: O comando a ser executado
+            safe_mode: Se True, bloqueia comandos destrutivos
+        """
+        # Lista de comandos perigosos
+        dangerous_commands = [
+            "del ", "rm ", "rmdir", "format", "shutdown", "restart",
+            "reg delete", "rd /s", "deltree", ":(){", "fork bomb"
+        ]
+        
+        command_lower = command.lower()
+        
+        # Verificar comandos perigosos
+        if safe_mode:
+            for dangerous in dangerous_commands:
+                if dangerous in command_lower:
+                    return f"⚠️ Comando bloqueado por segurança: contém '{dangerous}'. Use safe_mode=False para forçar."
+        
+        try:
+            # Executar comando
+            result = subprocess.run(
+                command,
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=60,
+                encoding='utf-8',
+                errors='replace'
+            )
+            
+            output = result.stdout if result.stdout else result.stderr
+            
+            if output:
+                # Limitar tamanho da saída
+                if len(output) > 1000:
+                    output = output[:1000] + "\n... (saída truncada)"
+                return f"✅ Comando executado:\n```\n{output}\n```"
+            else:
+                return "✅ Comando executado com sucesso (sem saída)."
+                
+        except subprocess.TimeoutExpired:
+            return "❌ O comando demorou muito para executar (timeout 60s)."
+        except Exception as e:
+            return f"❌ Erro ao executar comando: {str(e)}"
+    
+    async def get_running_processes(self, filter_name: Optional[str] = None) -> str:
+        """Lista processos em execução"""
+        try:
+            import psutil
+            
+            processes = []
+            for proc in psutil.process_iter(['pid', 'name', 'memory_percent', 'cpu_percent']):
+                try:
+                    info = proc.info
+                    if filter_name:
+                        if filter_name.lower() not in info['name'].lower():
+                            continue
+                    processes.append({
+                        'pid': info['pid'],
+                        'name': info['name'],
+                        'memory': round(info['memory_percent'], 1),
+                        'cpu': round(info['cpu_percent'], 1)
+                    })
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    continue
+            
+            # Ordenar por memória (decrescente)
+            processes.sort(key=lambda x: x['memory'], reverse=True)
+            
+            # Top 20 processos
+            top_processes = processes[:20]
+            
+            result = "📊 **Processos em Execução (Top 20 por memória):**\n\n"
+            result += "| PID | Nome | Memória | CPU |\n"
+            result += "|-----|------|---------|-----|\n"
+            
+            for p in top_processes:
+                result += f"| {p['pid']} | {p['name'][:20]} | {p['memory']}% | {p['cpu']}% |\n"
+            
+            return result
+            
+        except Exception as e:
+            return f"❌ Erro ao listar processos: {str(e)}"
+    
+    async def file_operations(self, operation: str, path: str, new_path: Optional[str] = None) -> str:
+        """
+        Operações com arquivos e pastas
+        
+        Args:
+            operation: 'create_folder', 'delete', 'move', 'copy', 'list'
+            path: Caminho do arquivo/pasta
+            new_path: Novo caminho (para move/copy)
+        """
+        import shutil
+        
+        # Expandir variáveis de ambiente e ~
+        path = os.path.expanduser(os.path.expandvars(path))
+        if new_path:
+            new_path = os.path.expanduser(os.path.expandvars(new_path))
+        
+        try:
+            if operation == 'create_folder':
+                os.makedirs(path, exist_ok=True)
+                return f"✅ Pasta criada: {path}"
+                
+            elif operation == 'create_file':
+                # Criar arquivo vazio
+                with open(path, 'w', encoding='utf-8') as f:
+                    pass
+                return f"✅ Arquivo criado: {path}"
+                
+            elif operation == 'list':
+                if os.path.isdir(path):
+                    items = os.listdir(path)
+                    result = f"📁 **Conteúdo de {path}:**\n\n"
+                    for item in items[:30]:
+                        full_path = os.path.join(path, item)
+                        if os.path.isdir(full_path):
+                            result += f"📁 {item}/\n"
+                        else:
+                            size = os.path.getsize(full_path)
+                            result += f"📄 {item} ({self._format_size(size)})\n"
+                    if len(items) > 30:
+                        result += f"\n... e mais {len(items) - 30} itens"
+                    return result
+                else:
+                    return f"❌ Caminho não é uma pasta: {path}"
+                    
+            elif operation == 'move':
+                if not new_path:
+                    return "❌ Novo caminho não especificado para mover"
+                shutil.move(path, new_path)
+                return f"✅ Movido de {path} para {new_path}"
+                
+            elif operation == 'copy':
+                if not new_path:
+                    return "❌ Novo caminho não especificado para copiar"
+                if os.path.isdir(path):
+                    shutil.copytree(path, new_path)
+                else:
+                    shutil.copy2(path, new_path)
+                return f"✅ Copiado de {path} para {new_path}"
+                
+            elif operation == 'delete':
+                # Segurança extra para delete
+                if os.path.isdir(path):
+                    if len(os.listdir(path)) > 0:
+                        return f"⚠️ Pasta não está vazia. Use comando direto se quiser deletar: {path}"
+                    os.rmdir(path)
+                else:
+                    os.remove(path)
+                return f"✅ Deletado: {path}"
+                
+            else:
+                return f"❌ Operação desconhecida: {operation}"
+                
+        except PermissionError:
+            return f"❌ Permissão negada: {path}"
+        except FileNotFoundError:
+            return f"❌ Arquivo/pasta não encontrado: {path}"
+        except Exception as e:
+            return f"❌ Erro: {str(e)}"
+    
+    def _format_size(self, size: int) -> str:
+        """Formata tamanho de arquivo"""
+        for unit in ['B', 'KB', 'MB', 'GB']:
+            if size < 1024:
+                return f"{size:.1f} {unit}"
+            size /= 1024
+        return f"{size:.1f} TB"
+    
+    async def open_url(self, url: str) -> str:
+        """Abre uma URL no navegador padrão"""
+        try:
+            # Adicionar https:// se não tiver protocolo
+            if not url.startswith(('http://', 'https://')):
+                url = 'https://' + url
+            
+            webbrowser.open(url)
+            return f"🌐 Abrindo: {url}"
+            
+        except Exception as e:
+            return f"❌ Erro ao abrir URL: {str(e)}"
+    
+    async def execute_action(self, action: dict) -> str:
+        """
+        Executa uma ação recebida da IA
+        
+        Args:
+            action: Dict com 'type' e parâmetros específicos
+        """
+        action_type = action.get('type', '')
+        
+        # Import tools on demand to avoid circular imports
+        from src.tools.web_search import web_search
+        from src.tools.screen_vision import screen_vision
+        
+        handlers = {
+            # Ações de sistema
+            'execute_command': lambda: self.execute_smart_command(action.get('command', '')),
+            'open_app': lambda: self._launch_app(action.get('app', '')),
+            'close_app': lambda: self.close_application(f"fechar {action.get('app', '')}"),
+            'open_url': lambda: self.open_url(action.get('url', '')),
+            'file_operation': lambda: self.file_operations(
+                action.get('operation', ''),
+                action.get('path', ''),
+                action.get('new_path')
+            ),
+            'list_processes': lambda: self.get_running_processes(action.get('filter')),
+            'set_volume': lambda: self.set_volume(action.get('level', 'aumentar')),
+            'screenshot': lambda: self.take_screenshot(''),
+            'type_text': lambda: self.type_text(f"digitar {action.get('text', '')}"),
+            
+            # Ações de pesquisa web
+            'web_search': lambda: web_search.search(action.get('query', '')),
+            'search_web': lambda: web_search.search(action.get('query', '')),
+            'read_page': lambda: web_search.read_webpage(action.get('url', '')),
+            'read_webpage': lambda: web_search.read_webpage(action.get('url', '')),
+            'youtube_summary': lambda: web_search.get_youtube_transcript(action.get('url', '')),
+            'youtube_transcript': lambda: web_search.get_youtube_transcript(action.get('url', '')),
+            
+            # Ações de visão
+            'analyze_screen': lambda: screen_vision.analyze_screen(action.get('question', 'O que você vê na tela?')),
+            'see_screen': lambda: screen_vision.analyze_screen(action.get('question', 'Descreva o que está na tela')),
+            'analyze_image': lambda: screen_vision.analyze_image_file(action.get('path', ''), action.get('question', 'Descreva esta imagem')),
+        }
+        
+        handler = handlers.get(action_type)
+        if handler:
+            return await handler()
+        else:
+            return f"❌ Ação desconhecida: {action_type}"

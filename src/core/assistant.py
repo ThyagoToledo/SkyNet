@@ -140,14 +140,29 @@ class SkynetAssistant:
             # Get conversation history for context
             history = await self.memory.get_conversation_history()
             
-            # Check if it's a system command
-            system_response = await self.check_system_command(text)
+            # Process with AI - agora a IA decide se precisa executar ações
+            raw_response = await self.ai.generate_response(text, history)
             
-            if system_response:
-                response = system_response
-            else:
-                # Process with AI
-                response = await self.ai.generate_response(text, history)
+            # Parse response para extrair ações
+            parsed = self.ai.parse_response_with_actions(raw_response)
+            response = parsed['message']
+            actions = parsed['actions']
+            
+            # Executar ações se houver
+            action_results = []
+            if actions:
+                print(f"[{self.name}] Executando {len(actions)} ação(ões)...")
+                for action in actions:
+                    try:
+                        result = await self.system_control.execute_action(action)
+                        action_results.append(result)
+                        print(f"[{self.name}] Ação: {action.get('type')} -> {result[:100]}")
+                    except Exception as e:
+                        action_results.append(f"❌ Erro: {str(e)}")
+            
+            # Combinar resposta com resultados das ações
+            if action_results:
+                response = response + "\n\n" + "\n".join(action_results)
             
             # Add response to memory
             await self.memory.add_message("assistant", response)
@@ -155,8 +170,8 @@ class SkynetAssistant:
             print(f"[{self.name}] {response}")
             await self.send_message(response, "assistant")
             
-            # Speak the response
-            await self.speak(response)
+            # Speak the response (só a mensagem, não os resultados técnicos)
+            await self.speak(parsed['message'])
             
         except Exception as e:
             error_msg = f"Desculpe, ocorreu um erro: {str(e)}"

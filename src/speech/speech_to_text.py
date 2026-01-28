@@ -1,10 +1,11 @@
 """
-Speech-to-Text Module using Whisper with DirectML (AMD GPU acceleration)
-Provides real-time speech recognition
+Speech-to-Text Module using Whisper with GPU acceleration
+Supports CPU, NVIDIA CUDA, and AMD DirectML
 """
 
 import asyncio
 import os
+import sys
 import numpy as np
 import queue
 import threading
@@ -14,11 +15,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class SpeechToText:
-    """Speech-to-Text using Whisper with AMD GPU acceleration via DirectML"""
+    """Speech-to-Text using Whisper with hardware acceleration"""
     
     def __init__(self):
         self.model_name = os.getenv("WHISPER_MODEL", "small")
         self.language = os.getenv("LANGUAGE", "pt")
+        self.device = os.getenv("WHISPER_DEVICE", "cpu")  # cpu, cuda, dml
         self.model = None
         self.processor = None
         self.audio_queue = queue.Queue()
@@ -35,48 +37,95 @@ class SpeechToText:
         self.on_volume_change: Optional[Callable[[float], Union[None, object]]] = None
         
     async def initialize(self):
-        """Initialize Whisper model with DirectML acceleration"""
+        """Initialize Whisper model with appropriate hardware acceleration"""
         try:
-            # Try to use optimum with DirectML for AMD GPU
-            print("[STT] Loading Whisper model with DirectML...")
+            print(f"[STT] Loading Whisper model (device: {self.device})...")
             
+            # Determine best provider based on device setting
+            if self.device == "cuda":
+                await self._init_with_cuda()
+            elif self.device == "dml":
+                await self._init_with_directml()
+            else:
+                await self._init_with_cpu()
+                
+        except Exception as e:
+            print(f"[STT] Error loading model: {e}")
+            print("[STT] Using fallback speech recognition...")
+            self.model = None
+            
+    async def _init_with_cuda(self):
+        """Initialize with NVIDIA CUDA acceleration"""
+        try:
+            import torch
+            if torch.cuda.is_available():
+                import whisper
+                self.model = whisper.load_model(self.model_name, device="cuda")
+                self.processor = None
+                print(f"[STT] Loaded Whisper {self.model_name} with NVIDIA CUDA")
+                return
+        except Exception as e:
+            print(f"[STT] CUDA initialization failed: {e}")
+        
+        # Fallback to CPU
+        await self._init_with_cpu()
+        
+    async def _init_with_directml(self):
+        """Initialize with AMD DirectML acceleration"""
+        try:
+            from optimum.onnxruntime import ORTModelForSpeechSeq2Seq
+            from transformers import WhisperProcessor
+            
+            model_id = f"openai/whisper-{self.model_name}"
+            
+            # Load processor
+            self.processor = WhisperProcessor.from_pretrained(model_id)
+            
+            # Try to load ONNX model with DirectML
+            self.model = ORTModelForSpeechSeq2Seq.from_pretrained(
+                model_id,
+                export=True,
+                provider="DmlExecutionProvider"  # AMD GPU via DirectML
+            )
+            print(f"[STT] Loaded Whisper {self.model_name} with AMD DirectML")
+            return
+        except ImportError:
+            print("[STT] Optimum not available for DirectML")
+        except Exception as e:
+            print(f"[STT] DirectML initialization failed: {e}")
+        
+        # Fallback to CPU
+        await self._init_with_cpu()
+        
+    async def _init_with_cpu(self):
+        """Initialize with CPU (standard Whisper)"""
+        try:
+            # Try optimized ONNX first
             try:
                 from optimum.onnxruntime import ORTModelForSpeechSeq2Seq
                 from transformers import WhisperProcessor
                 
                 model_id = f"openai/whisper-{self.model_name}"
-                
-                # Load processor
                 self.processor = WhisperProcessor.from_pretrained(model_id)
-                
-                # Try to load ONNX model with DirectML
-                try:
-                    self.model = ORTModelForSpeechSeq2Seq.from_pretrained(
-                        model_id,
-                        export=True,
-                        provider="DmlExecutionProvider"  # AMD GPU via DirectML
-                    )
-                    print("[STT] Using AMD GPU acceleration (DirectML)")
-                except Exception:
-                    # Fallback to CPU ONNX
-                    self.model = ORTModelForSpeechSeq2Seq.from_pretrained(
-                        model_id,
-                        export=True,
-                        provider="CPUExecutionProvider"
-                    )
-                    print("[STT] Using CPU (ONNX optimized)")
-                    
+                self.model = ORTModelForSpeechSeq2Seq.from_pretrained(
+                    model_id,
+                    export=True,
+                    provider="CPUExecutionProvider"
+                )
+                print(f"[STT] Loaded Whisper {self.model_name} with ONNX CPU optimization")
+                return
             except ImportError:
-                # Fallback to standard Whisper
-                print("[STT] Optimum not available, using standard Whisper...")
-                import whisper
-                self.model = whisper.load_model(self.model_name)
-                self.processor = None
-                print(f"[STT] Loaded Whisper {self.model_name} model")
+                pass
                 
+            # Fallback to standard Whisper
+            print("[STT] Using standard Whisper (CPU)...")
+            import whisper
+            self.model = whisper.load_model(self.model_name)
+            self.processor = None
+            print(f"[STT] Loaded Whisper {self.model_name} model (CPU)")
+            
         except Exception as e:
-            print(f"[STT] Error loading model: {e}")
-            print("[STT] Using fallback speech recognition...")
+            print(f"[STT] CPU initialization failed: {e}")
             self.model = None
             
     async def listen(self) -> Optional[str]:

@@ -1,18 +1,36 @@
 # Skynet - Personal Assistant Dependencies
 
-# Speech Recognition (STT) - Whisper with AMD GPU acceleration
+# ============================================
+# Core AI - Speech Recognition (Whisper)
+# ============================================
 openai-whisper>=20231117
-optimum[onnxruntime-directml]>=1.16.0
-onnxruntime-directml>=1.16.0
 transformers>=4.36.0
 sounddevice>=0.4.6
 numpy>=1.24.0
 scipy>=1.11.0
 
-# AI Integration - Local Ollama (install separately from https://ollama.com)
-# No Python package needed - Ollama runs as a separate service
+# GPU Acceleration (install based on your hardware):
+# -------------------------------------------------
+# For AMD GPU (DirectML - Windows):
+#   pip install optimum[onnxruntime-directml] onnxruntime-directml
+# For NVIDIA GPU (CUDA):
+#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+# For CPU only:
+#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
+# Default: DirectML for AMD GPUs on Windows
+optimum[onnxruntime-directml]>=1.16.0
+onnxruntime-directml>=1.16.0
+
+# ============================================
+# AI Integration - Local Ollama
+# ============================================
+# Install separately from https://ollama.com
+# Then run: ollama pull qwen2.5:3b
+
+# ============================================
 # Text-to-Speech (TTS)
+# ============================================
 pyttsx3>=2.90
 edge-tts>=6.1.0
 pygame>=2.4.0
@@ -39,3 +57,12 @@ httpx>=0.25.0
 
 # Desktop Application
 pywebview>=5.0
+
+# Web Search & Content Extraction
+duckduckgo-search>=4.0
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+youtube-transcript-api>=0.6.0
+
+# Image Processing & Vision
+Pillow>=10.0.0

@@ -27,6 +27,7 @@ Thumbs.db
 # Logs
 *.log
 logs/
+log.txt
 
 # Temporary files
 tmp/
@@ -44,3 +45,19 @@ screenshots/
 # Model cache
 models/
 .cache/
+
+# Installer-generated folders (user runs install.bat)
+node_modules/
+ollama/
+ffmpeg/
+.ollama/
+
+# Data files generated at runtime
+data/skynet.log
+data/audio_config.json
+data/preferences.json
+data/chat_history.json
+
+# Gemini brain folder
+.gemini/
+
